@@ -1,0 +1,42 @@
+# MediaMTX Configuration File (mediamtx.yml)
+# Updated for better error handling in FFmpeg remuxing.
+
+# Global settings
+logLevel: debug  # Increased for detailed troubleshooting
+api: yes
+apiAddress: :9997
+metrics: yes
+
+# Default path settings
+pathDefaults:
+  # writeQueueSize: 512
+  record: yes
+  recordPath: ./recordings/%path/%Y-%m-%d_%H-%M-%S.mp4
+  recordSegmentDuration: 2m
+  recordDeleteAfter: 10m
+  # sourceOnDemand: yes
+  sourceOnDemandStartTimeout: 10s
+  sourceOnDemandCloseAfter: 10s
+
+# Per-camera paths (original sources)
+paths:
+  cam1:
+    source: rtsp://admin:Events132%40@timberspace.ddns.net:8555/stream1
+
+  cam2:
+    source: rtsp://admin:Events132%40@timberspace.ddns.net:8554/stream1
+
+  # Remuxed versions for browser (with error-tolerant FFmpeg)
+  cam1_browser:
+    runOnDemand: ffmpeg -err_detect ignore_err -i rtsp://localhost:8554/cam1 -c:v libx264 -preset ultrafast -b:v 1000k -c:a aac -f rtsp rtsp://localhost:8554/cam1_browser
+    runOnDemandRestart: yes
+
+  cam2_browser:
+    runOnDemand: ffmpeg -err_detect ignore_err -i rtsp://localhost:8554/cam2 -c:v libx264 -preset ultrafast -b:v 1000k -c:a aac -f rtsp rtsp://localhost:8554/cam2_browser
+    runOnDemandRestart: yes
+
+# WebRTC and HLS
+webrtc: yes
+webrtcAddress: :8889
+hls: yes
+hlsAddress: :8888
