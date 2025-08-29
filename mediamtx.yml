@@ -484,30 +484,16 @@ pathDefaults:
   fallback:
 
 
-  ###############################################
-  # Default path settings -> Record
+###############################################
+# Default path settings -> Record
 
-
-  # Record streams to disk.
-  record: no
-  # Path of recording segments.
-  # Extension is added automatically.
-  # Available variables are %path (path name), %Y %m %d %H %M %S %f %s (time in strftime format)
-  recordPath: ./recordings/%path/%Y-%m-%d_%H-%M-%S.mp4
-  # Format of recorded segments.
-  # Available formats are "fmp4" (fragmented MP4) and "mpegts" (MPEG-TS).
+  record: true
+  recordPath: /data/recordings/%path/%Y-%m-%d_%H-%M-%S
   recordFormat: fmp4
-  # fMP4 segments are concatenation of small MP4 files (parts), each with this duration.
-  # MPEG-TS segments are concatenation of 188-bytes packets, flushed to disk with this period.
-  # When a system failure occurs, the last part gets lost.
-  # Therefore, the part duration is equal to the RPO (recovery point objective).
-  recordPartDuration: 1s
-  # Minimum duration of each segment.
-  recordSegmentDuration: 2m
-  # Delete segments after this timespan.
-  # Set to 0s to disable automatic deletion.
-  recordDeleteAfter: 10m
+  recordSegmentDuration: 5s
 
+
+###############################################
 
 
 
@@ -752,18 +738,14 @@ pathDefaults:
 # for example "~^(test1|test2)$" will match both "test1" and "test2",
 # for example "~^prefix" will match all paths that start with "prefix".
 paths:
-  cam1:
-    source: rtsp://admin:Events132%40@timberspace.ddns.net:8555/stream1
-
-  cam1_browser:
-    runOnDemand: ffmpeg -err_detect ignore_err -i rtsp://localhost:8554/cam1 -c:v libx264 -preset ultrafast -b:v 1000k -c:a aac -f rtsp rtsp://localhost:8554/cam1_browser
-    runOnDemandRestart: true
-
   cam2:
     source: rtsp://admin:Events132%40@timberspace.ddns.net:8554/stream1
 
-  cam2_browser:
-    runOnDemand: ffmpeg -err_detect ignore_err -i rtsp://localhost:8554/cam2 -c:v libx264 -preset ultrafast -b:v 1000k -c:a aac -f rtsp rtsp://localhost:8554/cam2_browser
-    runOnDemandRestart: true
-
-  all_others:
+  cam2_reencoded:
+    runOnInit: >
+      ffmpeg -rtsp_transport tcp -i rtsp://localhost:8554/cam2
+      -c:v libx264 -preset veryfast -crf 18
+      -g 150 -keyint_min 150 -sc_threshold 0
+      -c:a aac -ar 44100 -ac 2
+      -f rtsp rtsp://localhost:8554/cam2_reencoded
+    runOnInitRestart: true
