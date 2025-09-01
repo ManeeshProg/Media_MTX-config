@@ -739,13 +739,8 @@ pathDefaults:
 # for example "~^prefix" will match all paths that start with "prefix".
 paths:
   cam2:
-    source: rtsp://admin:Events132%40@timberspace.ddns.net:8554/stream1
-
-  cam2_reencoded:
-    runOnInit: >
-      ffmpeg -rtsp_transport tcp -i rtsp://localhost:8554/cam2
-      -c:v libx264 -preset veryfast -crf 18
-      -g 150 -keyint_min 150 -sc_threshold 0
-      -c:a aac -ar 44100 -ac 2
-      -f rtsp rtsp://localhost:8554/cam2_reencoded
-    runOnInitRestart: true
+    source: rtsp://admin:Events132%40@timberspace.ddns.net:8555/stream1
+    record: yes
+    recordPath: /data/recordings/cam2-%Y-%m-%d_%H-%M-%S-%f.mp4
+    recordFormat: mp4
+    recordDuration: 5s
